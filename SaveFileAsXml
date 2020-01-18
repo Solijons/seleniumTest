@@ -1,0 +1,80 @@
+// Generator class in java that save files as xml
+  // Preconditions
+  // JCOMMANDER & Xstream LIBRARY HAS TO BE IN THE PROJECT
+  
+  
+package generators;
+
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
+import model.USER;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;;
+import java.util.ArrayList;
+import java.util.List;
+
+
+public class Generators {
+    @Parameter(names = "-c", description = "USER Form Count")
+    public int count;
+
+    @Parameter(names = "-f", description = "Target file")
+    public String file;
+
+    @Parameter(names = "-d", description = "Data format")
+    public String format;
+
+
+    public static void main(String[] args) throws IOException {
+        Generators generators = new Generators();
+        JCommander jCommander = new JCommander(generators);
+        try {
+            jCommander.parse(args);
+        } catch (ParameterException e) {
+            jCommander.usage();
+            return;
+        }
+        generators.run();
+    }
+
+    private void run() throws IOException {
+        List<USER> users = generateUsers(count);
+        if (format.equals("xml")){
+            saveAsXml(users, new File(file));
+        } else {
+            System.out.println("Unrecognized format");
+        }
+
+    }
+
+    private void saveAsXml(List<USER> users, File file) throws IOException {
+        XStream xStream = new XStream();
+        xStream.processAnnotations(USER.class);
+        String xml = xStream.toXML(users);
+        try(Writer writer = new FileWriter(file);) {
+            writer.write(xml);
+        }
+    }
+
+    private List<USER> generateUsers(int count) {
+        List<USER> users = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            users.add(new USER()
+                    .withName("Solijon")
+                    .withEmail("Solijon@user.com")
+                    .withPhone(4243825880)
+            );
+        }
+        return users;
+    }
+}
+
+
+
+// When you run on IDE make sure to pass paramters on your VMOptions (see lines 22 - 29);
+// I.E -c 10 -f dir/ -d xml
+ 
